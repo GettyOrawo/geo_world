@@ -26,3 +26,4 @@ geo_world-*.tar
 # Temporary files for e.g. tests
 /tmp
 data_dump.csv
+mix.lock
