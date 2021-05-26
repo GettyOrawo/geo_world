@@ -17,6 +17,9 @@ defmodule GeoWorld do
     |> Keyword.get_values(:ok)
   end
 
+  @doc """
+  Persists each record from csv and returns statistics of accepted & rejected records
+  """
 
   def persist_record([], accepted, rejected, {current, total}) do
     %{accepted: accepted, rejected: rejected, total_records: total}
@@ -33,8 +36,23 @@ defmodule GeoWorld do
     end
   end
 
+  @doc """
+  imports csv records and persists them on the database
+  """
+
   def import_csv do
-    data = decode_csv()
-    {time_in_micro, res} = :timer.tc(fn -> persist_record(data, 0 ,0 , {0, Enum.count(data)}) end)
+    {time_in_micro, res} = :timer.tc(fn -> 
+      data = decode_csv()
+      persist_record(data, 0 ,0 , {0, Enum.count(data)}) 
+    end)
+    Enum.into(%{time_elapsed_in_microsecs: time_in_micro}, res)
+  end
+
+  @doc """
+  fetches a single location's details based on the provided ip_address
+  """
+
+  def get_geolocation_data(ip_address) do
+    Geolocation |> Repo.get_by(ip_address: ip_address)
   end
 end
