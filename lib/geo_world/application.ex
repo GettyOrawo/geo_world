@@ -1,7 +1,8 @@
 defmodule GeoWorld.Application do
   def start(_type, _args) do
     children = [
-      GeoWorld.Repo,
+      {GeoWorld.Repo, []}
+
     ]
     opts = [strategy: :one_for_one, name: GeoWorld.Supervisor]
 
