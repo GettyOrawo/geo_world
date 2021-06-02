@@ -1,6 +1,6 @@
 defmodule GeoWorld do
   @moduledoc """
-  A module for geolocation information
+  A module for geolocation information it fetches records from a csv file(comma separated) & persists it to a database
   """
   alias GeoWorld.Geolocation
   alias GeoWorld.Repo
@@ -11,9 +11,10 @@ defmodule GeoWorld do
 
   def decode_csv do
     "data_dump.csv"
-    |> File.stream!
+    |> File.stream!()
     |> CSV.decode(separator: ?,, headers: true)
-    |> Enum.take(10) #only for the first 10 records
+    # only for the first 10 records
+    |> Enum.take(10)
     |> Keyword.get_values(:ok)
   end
 
@@ -25,14 +26,16 @@ defmodule GeoWorld do
     %{accepted: accepted, rejected: rejected, total_records: total}
   end
 
-  def persist_record(data, accepted, rejected, {current, total}) do   
-    [params | rem] = data 
+  def persist_record(data, accepted, rejected, {current, total}) do
+    [params | rem] = data
     changeset = Geolocation.changeset(%Geolocation{}, params)
+
     case Repo.insert(changeset) do
-      {:ok, geolocation} -> 
-        persist_record(rem, accepted+1, rejected, {current + 1, total})
-      {:error, changeset} -> 
-        persist_record(rem, accepted, rejected+1, {current + 1, total})
+      {:ok, geolocation} ->
+        persist_record(rem, accepted + 1, rejected, {current + 1, total})
+
+      {:error, changeset} ->
+        persist_record(rem, accepted, rejected + 1, {current + 1, total})
     end
   end
 
@@ -41,10 +44,12 @@ defmodule GeoWorld do
   """
 
   def import_csv do
-    {time_in_micro, res} = :timer.tc(fn -> 
-      data = decode_csv()
-      persist_record(data, 0 ,0 , {0, Enum.count(data)}) 
-    end)
+    {time_in_micro, res} =
+      :timer.tc(fn ->
+        data = decode_csv()
+        persist_record(data, 0, 0, {0, Enum.count(data)})
+      end)
+
     Enum.into(%{time_elapsed_in_microsecs: time_in_micro}, res)
   end
 
