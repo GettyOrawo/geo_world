@@ -9,8 +9,8 @@ defmodule GeoWorld do
   Takes input from CSV file and decodes each line into a map as a record
   """
 
-  def decode_csv do
-    "data_dump_test.csv"
+  def decode_csv(file \\ "data_dump_test.csv") do
+    file
     |> File.stream!()
     |> CSV.decode(separator: ?,, headers: true)
     # only for the first 10 records
@@ -43,10 +43,10 @@ defmodule GeoWorld do
   imports csv records and persists them on the database
   """
 
-  def import_csv do
+  def import_csv(file) do
     {time_in_micro, res} =
       :timer.tc(fn ->
-        data = decode_csv()
+        data = decode_csv(file)
         persist_record(data, 0, 0, {0, Enum.count(data)})
       end)
 
