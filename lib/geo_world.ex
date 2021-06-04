@@ -10,11 +10,11 @@ defmodule GeoWorld do
   """
 
   def decode_csv do
-    "data_dump.csv"
+    "data_dump_test.csv"
     |> File.stream!()
     |> CSV.decode(separator: ?,, headers: true)
     # only for the first 10 records
-    |> Enum.take(10)
+    |> Enum.to_list
     |> Keyword.get_values(:ok)
   end
 
