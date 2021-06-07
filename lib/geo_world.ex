@@ -47,10 +47,10 @@ defmodule GeoWorld do
     {time_in_micro, res} =
       :timer.tc(fn ->
         data = decode_csv(file)
-        persist_record(data, 0, 0)
+        data
+        |> persist_record(data, 0, 0)
+        |> Enum.into(%{time_elapsed_in_microsecs: time_in_micro, total_records: Enum.count(data)})
       end)
-
-    Enum.into(%{time_elapsed_in_microsecs: time_in_micro, total_records: Enum.count(data)}, res)
   end
 
   @doc """
