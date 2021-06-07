@@ -22,20 +22,20 @@ defmodule GeoWorld do
   Persists each record from csv and returns statistics of accepted & rejected records
   """
 
-  def persist_record([], accepted, rejected, {current, total}) do
-    %{accepted: accepted, rejected: rejected, total_records: total}
+  def persist_record([], accepted, rejected) do
+    %{accepted: accepted, rejected: rejected}
   end
 
-  def persist_record(data, accepted, rejected, {current, total}) do
+  def persist_record(data, accepted, rejected) do
     [params | rem] = data
     changeset = Geolocation.changeset(%Geolocation{}, params)
 
     case Repo.insert(changeset) do
-      {:ok, geolocation} ->
-        persist_record(rem, accepted + 1, rejected, {current + 1, total})
+      {:ok, _geolocation} ->
+        persist_record(rem, accepted + 1, rejected)
 
-      {:error, changeset} ->
-        persist_record(rem, accepted, rejected + 1, {current + 1, total})
+      {:error, _changeset} ->
+        persist_record(rem, accepted, rejected + 1)
     end
   end
 
@@ -47,10 +47,10 @@ defmodule GeoWorld do
     {time_in_micro, res} =
       :timer.tc(fn ->
         data = decode_csv(file)
-        persist_record(data, 0, 0, {0, Enum.count(data)})
+        persist_record(data, 0, 0)
       end)
 
-    Enum.into(%{time_elapsed_in_microsecs: time_in_micro}, res)
+    Enum.into(%{time_elapsed_in_microsecs: time_in_micro, total_records: Enum.count(data)}, res)
   end
 
   @doc """
